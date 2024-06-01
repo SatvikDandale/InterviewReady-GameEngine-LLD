@@ -9,6 +9,7 @@ public class AIEngine {
             TicTacToe board1 = (TicTacToe) board;
             int threshold = 4;
             TicTacToe copy = board1.copy();
+            // Facade design patter: Abstracted the algorithm by a single function call
             if (countMoves(copy) < threshold) {
                return playBasicMove(copy, player);
             }

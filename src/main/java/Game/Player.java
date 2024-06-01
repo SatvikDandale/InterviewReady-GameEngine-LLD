@@ -13,6 +13,7 @@ public class Player {
     }
 
     public Player flip() {
+        // In a way, prototype design pattern
         return new Player("X".equals(symbol) ? "O" : "X");
     }
 

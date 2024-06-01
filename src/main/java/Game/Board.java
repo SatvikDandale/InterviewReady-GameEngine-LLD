@@ -3,6 +3,6 @@ package Game;
 public interface Board {
 
     void move(Move move);
-    Board copy();
+    Board copy();   // Prototype Design pattern for cloning using objects
 
 }
