@@ -2,44 +2,28 @@ package Game;
 
 import board.TicTacToe;
 
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 public class RuleEngine {
 
     public GameState getGameState(Board board) {
 
         if (board instanceof TicTacToe) {
 
-            // Row Complete Check
             TicTacToe board1 = (TicTacToe) board;
-            boolean rowComplete = true;
+
+            BiFunction<Integer, Integer, String> getSymbolForRowCheck = board1::getSymbol;
+            BiFunction<Integer, Integer, String> getSymbolForColCheck = (i, j) -> board1.getSymbol(j, i);
+
+            GameState rowWin = isVictory(getSymbolForRowCheck);
+            if (rowWin != null) return rowWin;
+
+            GameState colWin = isVictory(getSymbolForColCheck);
+            if (colWin != null) return colWin;
+
+
             String firstCharacter = "-";
-            for (int i = 0; i < 3; i++) {
-                firstCharacter = board1.getSymbol(i, 0);
-                rowComplete = firstCharacter != null;
-                if (firstCharacter != null)
-                    for (int j = 1; j < 3; j++) {
-                        if (!firstCharacter.equals(board1.getSymbol(i, j))) {
-                            rowComplete = false;
-                            break;
-                        }
-                    }
-                if (rowComplete) break;
-            }
-            if (rowComplete) return new GameState(true, firstCharacter);
-            // Col Complete Check
-            boolean colComplete = true;
-            for (int i = 0; i < 3; i++) {
-                firstCharacter = board1.getSymbol(0, i);
-                colComplete = firstCharacter != null;
-                if (firstCharacter != null)
-                    for (int j = 0; j < 3; j++) {
-                        if (!firstCharacter.equals(board1.getSymbol(j, i))) {
-                            colComplete = false;
-                            break;
-                        }
-                    }
-                if (colComplete) break;
-            }
-            if (colComplete) return new GameState(true, firstCharacter);
             // Diag complete check
             firstCharacter = board1.getSymbol(0, 0);
             boolean diagComplete = firstCharacter != null;
@@ -72,6 +56,22 @@ public class RuleEngine {
             return new GameState(false, "-");
         }
         return new GameState(false, "-");
+    }
+
+    private static GameState isVictory(BiFunction<Integer, Integer, String> getNext) {
+        for (int i = 0; i < 3; i++) {
+            boolean victory = true;
+            for (int j = 0; j < 3; j++) {
+                if (getNext.apply(i, 0) == null ||
+                        getNext.apply(i, j) == null ||
+                        !getNext.apply(i, 0).equals(getNext.apply(i, j))) {
+                    victory = false;
+                    break;
+                }
+            }
+            if (victory) return new GameState(true, getNext.apply(i, 0));
+        }
+        return null;
     }
 
 }
