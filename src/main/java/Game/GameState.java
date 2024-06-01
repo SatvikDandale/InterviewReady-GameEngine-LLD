@@ -9,8 +9,12 @@ public class GameState {
         this.isComplete = isComplete;
         this.winner = winner;
     }
-    public boolean isComplete() {
+    public boolean gameOver() {
         return isComplete;
+    }
+
+    public String getWinner() {
+        return winner;
     }
 
     @Override

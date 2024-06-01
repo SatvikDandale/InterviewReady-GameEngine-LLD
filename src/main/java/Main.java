@@ -13,7 +13,7 @@ public class Main {
         AIEngine aiEngine = new AIEngine();
 
         Scanner scanner = new Scanner(System.in);
-        while (!ruleEngine.getGameState(board).isComplete()) {
+        while (!ruleEngine.getGameState(board).gameOver()) {
             Player human = new Player("X"), computer = new Player("O");
             System.out.println(board);
             System.out.println("Make your move!");
@@ -22,7 +22,7 @@ public class Main {
             Move humanMove = new Move(new Cell(row, col), human);
             gameEngine.move(board, humanMove);
             System.out.println(board);
-            if (!ruleEngine.getGameState(board).isComplete()) {
+            if (!ruleEngine.getGameState(board).gameOver()) {
                 Move computerMove = aiEngine.suggestMove(board, computer);
                 gameEngine.move(board, computerMove);
             }
