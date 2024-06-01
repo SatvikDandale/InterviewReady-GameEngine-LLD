@@ -1,6 +1,7 @@
 package api;
 
-import Game.*;
+import Game.Board;
+import Game.Move;
 import board.TicTacToe;
 
 public class GameEngine {
