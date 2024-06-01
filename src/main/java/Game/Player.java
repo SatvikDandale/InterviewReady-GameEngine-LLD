@@ -12,4 +12,8 @@ public class Player {
         return symbol;
     }
 
+    public Player flip() {
+        return new Player("X".equals(symbol) ? "O" : "X");
+    }
+
 }
