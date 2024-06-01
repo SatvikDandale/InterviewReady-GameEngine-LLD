@@ -10,46 +10,26 @@ public class RuleEngine {
     public GameState getGameState(Board board) {
 
         if (board instanceof TicTacToe) {
+            TicTacToe ticTacToeBoard = (TicTacToe) board;
 
-            TicTacToe board1 = (TicTacToe) board;
-
-            BiFunction<Integer, Integer, String> getSymbolForRowCheck = board1::getSymbol;
-            BiFunction<Integer, Integer, String> getSymbolForColCheck = (i, j) -> board1.getSymbol(j, i);
-
-            GameState rowWin = isVictory(getSymbolForRowCheck);
+            GameState rowWin = isVictory((i, j) -> ticTacToeBoard.getSymbol(i, j));
             if (rowWin != null) return rowWin;
 
-            GameState colWin = isVictory(getSymbolForColCheck);
+            GameState colWin = isVictory((i, j) -> ticTacToeBoard.getSymbol(j, i));
             if (colWin != null) return colWin;
 
+            GameState diagVictory = isDiagVictory(i -> ticTacToeBoard.getSymbol(i, i));
+            if (diagVictory != null) return diagVictory;
 
-            String firstCharacter = "-";
-            // Diag complete check
-            firstCharacter = board1.getSymbol(0, 0);
-            boolean diagComplete = firstCharacter != null;
-            for (int i = 0; i < 3; i++) {
-                if (firstCharacter != null && !firstCharacter.equals(board1.getSymbol(i, i))) {
-                    diagComplete = false;
-                    break;
-                }
-            }
-            if (diagComplete) return new GameState(true, firstCharacter);
-            // Rev Diag complete check
-            firstCharacter = board1.getSymbol(0, 2);
-            boolean revDiagComplete = firstCharacter != null;
-            for (int i = 0; i < 3; i++) {
-                if (firstCharacter != null && !firstCharacter.equals(board1.getSymbol(i, 2 - i))) {
-                    revDiagComplete = false;
-                    break;
-                }
-            }
-            if (revDiagComplete) return new GameState(true, firstCharacter);
+            GameState revDiagVictory = isDiagVictory(i -> ticTacToeBoard.getSymbol(i, 2 - i));
+            if (revDiagVictory != null) return revDiagVictory;
+
 
             // Check places filled
             int count = 0;
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
-                    if (board1.getSymbol(i, j) != null) count++;
+                    if (ticTacToeBoard.getSymbol(i, j) != null) count++;
                 }
             }
             if (count == 9) return new GameState(true, "-");
@@ -58,18 +38,30 @@ public class RuleEngine {
         return new GameState(false, "-");
     }
 
-    private static GameState isVictory(BiFunction<Integer, Integer, String> getNext) {
+    private GameState isDiagVictory(Function<Integer, String> characterSupplier) {
+        boolean diagWin = true;
+        for (int i = 0; i < 3; i++) {
+            if (characterSupplier.apply(0) == null || !characterSupplier.apply(0).equals(characterSupplier.apply(i))) {
+                diagWin = false;
+                break;
+            }
+        }
+        if (diagWin) return new GameState(true, characterSupplier.apply(0));
+        return null;
+    }
+
+    private static GameState isVictory(BiFunction<Integer, Integer, String> characterSupplier) {
         for (int i = 0; i < 3; i++) {
             boolean victory = true;
             for (int j = 0; j < 3; j++) {
-                if (getNext.apply(i, 0) == null ||
-                        getNext.apply(i, j) == null ||
-                        !getNext.apply(i, 0).equals(getNext.apply(i, j))) {
+                if (characterSupplier.apply(i, 0) == null ||
+                        characterSupplier.apply(i, j) == null ||
+                        !characterSupplier.apply(i, 0).equals(characterSupplier.apply(i, j))) {
                     victory = false;
                     break;
                 }
             }
-            if (victory) return new GameState(true, getNext.apply(i, 0));
+            if (victory) return new GameState(true, characterSupplier.apply(i, 0));
         }
         return null;
     }
