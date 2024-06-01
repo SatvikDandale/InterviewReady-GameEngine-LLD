@@ -18,10 +18,10 @@ public class RuleEngine {
             GameState colWin = isVictory((i, j) -> ticTacToeBoard.getSymbol(j, i));
             if (colWin != null) return colWin;
 
-            GameState diagVictory = isDiagVictory(i -> ticTacToeBoard.getSymbol(i, i));
+            GameState diagVictory = traversal(i -> ticTacToeBoard.getSymbol(i, i));
             if (diagVictory != null) return diagVictory;
 
-            GameState revDiagVictory = isDiagVictory(i -> ticTacToeBoard.getSymbol(i, 2 - i));
+            GameState revDiagVictory = traversal(i -> ticTacToeBoard.getSymbol(i, 2 - i));
             if (revDiagVictory != null) return revDiagVictory;
 
 
@@ -38,32 +38,26 @@ public class RuleEngine {
         return new GameState(false, "-");
     }
 
-    private GameState isDiagVictory(Function<Integer, String> characterSupplier) {
-        boolean diagWin = true;
+    private GameState isVictory(BiFunction<Integer, Integer, String> characterSupplier) {
         for (int i = 0; i < 3; i++) {
-            if (characterSupplier.apply(0) == null || !characterSupplier.apply(0).equals(characterSupplier.apply(i))) {
-                diagWin = false;
-                break;
-            }
+            int finalI = i;
+            GameState traverse = traversal(j -> characterSupplier.apply(finalI, j));
+            if (traverse != null) return traverse;
         }
-        if (diagWin) return new GameState(true, characterSupplier.apply(0));
         return null;
     }
 
-    private static GameState isVictory(BiFunction<Integer, Integer, String> characterSupplier) {
-        for (int i = 0; i < 3; i++) {
-            boolean victory = true;
-            for (int j = 0; j < 3; j++) {
-                if (characterSupplier.apply(i, 0) == null ||
-                        characterSupplier.apply(i, j) == null ||
-                        !characterSupplier.apply(i, 0).equals(characterSupplier.apply(i, j))) {
-                    victory = false;
-                    break;
-                }
+    private GameState traversal(Function<Integer, String> characterSupplier) {
+        boolean win = true;
+        for (int j = 0; j < 3; j++) {
+            if (characterSupplier.apply(0) == null || !characterSupplier.apply(0).equals(characterSupplier.apply(j))) {
+                win = false;
+                break;
             }
-            if (victory) return new GameState(true, characterSupplier.apply(i, 0));
         }
+        if (win) return new GameState(true, characterSupplier.apply(0));
         return null;
     }
+
 
 }
