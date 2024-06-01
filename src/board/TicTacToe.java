@@ -2,6 +2,8 @@ package board;
 
 import Game.Board;
 import Game.Cell;
+import Game.Move;
+import Game.Player;
 
 public class TicTacToe extends Board {
 
@@ -28,6 +30,11 @@ public class TicTacToe extends Board {
             result.append("\n");
         }
         return result.toString();
+    }
+
+    @Override
+    public void move(Move move) {
+        setCell(move.getCell(), move.getPlayer().getSymbol());
     }
 
 }
