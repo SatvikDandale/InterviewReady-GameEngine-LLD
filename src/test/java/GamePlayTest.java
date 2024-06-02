@@ -1,5 +1,6 @@
 import Game.*;
 import api.GameEngine;
+import api.RuleEngine;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

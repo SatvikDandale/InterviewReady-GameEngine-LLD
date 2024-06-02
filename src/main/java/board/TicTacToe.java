@@ -8,6 +8,18 @@ public class TicTacToe implements Board {
 
     String cells[][] = new String[3][3];
 
+    public enum Symbol {
+        X("X"), O("O");
+
+        final String symbol;
+        Symbol(String symbol) {
+            this.symbol = symbol;
+        }
+        public String getSymbol() {
+            return symbol;
+        }
+    }
+
     // getCell is defined in TicTacToe and not in board
     // because the parent Board might not have cells
     // but TicTacToe definitely does
