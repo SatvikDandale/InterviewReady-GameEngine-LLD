@@ -2,52 +2,63 @@ package Game;
 
 import board.TicTacToe;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+class Rule<T extends Board> {
+
+    Function<T, GameState> condition;
+    public Rule(Function<T, GameState> rule) {
+        this.condition = rule;
+    }
+
+}
+
 public class RuleEngine {
+
+    Map<String, List<Rule<TicTacToe>>> rulesMap;
+
+    public RuleEngine() {
+        rulesMap = new HashMap<>();
+        rulesMap.put(TicTacToe.class.getName(), new ArrayList<>());
+        rulesMap.get(TicTacToe.class.getName()).add(new Rule<>(ticTacToeBoard -> completeTraversal(ticTacToeBoard::getSymbol)));
+        rulesMap.get(TicTacToe.class.getName()).add(new Rule<>(ticTacToeBoard -> completeTraversal((i, j) -> ticTacToeBoard.getSymbol(j, i))));
+        rulesMap.get(TicTacToe.class.getName()).add(new Rule<>(ticTacToeBoard -> innerTraversal(i -> ticTacToeBoard.getSymbol(i, i))));
+        rulesMap.get(TicTacToe.class.getName()).add(new Rule<>(ticTacToeBoard -> innerTraversal(i -> ticTacToeBoard.getSymbol(i, 2 - i))));
+        rulesMap.get(TicTacToe.class.getName()).add(new Rule<>(this::countMoves));
+    }
 
     public GameState getGameState(Board board) {
 
         if (board instanceof TicTacToe) {
             TicTacToe ticTacToeBoard = (TicTacToe) board;
-
-            GameState rowWin = isVictory((i, j) -> ticTacToeBoard.getSymbol(i, j));
-            if (rowWin != null) return rowWin;
-
-            GameState colWin = isVictory((i, j) -> ticTacToeBoard.getSymbol(j, i));
-            if (colWin != null) return colWin;
-
-            GameState diagVictory = traversal(i -> ticTacToeBoard.getSymbol(i, i));
-            if (diagVictory != null) return diagVictory;
-
-            GameState revDiagVictory = traversal(i -> ticTacToeBoard.getSymbol(i, 2 - i));
-            if (revDiagVictory != null) return revDiagVictory;
-
-
-            // Check places filled
-            int count = 0;
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    if (ticTacToeBoard.getSymbol(i, j) != null) count++;
-                }
+            List<Rule<TicTacToe>> rules = rulesMap.get(TicTacToe.class.getName());
+            for (Rule<TicTacToe> rule : rules) {
+                GameState gameState = rule.condition.apply(ticTacToeBoard);
+                if (gameState.gameOver()) return gameState;
             }
-            if (count == 9) return new GameState(true, "-");
+
             return new GameState(false, "-");
         }
-        return new GameState(false, "-");
+        throw new IllegalArgumentException();
     }
 
-    private GameState isVictory(BiFunction<Integer, Integer, String> characterSupplier) {
+    private GameState completeTraversal(BiFunction<Integer, Integer, String> characterSupplier) {
+        GameState result = new GameState(false, "-");
         for (int i = 0; i < 3; i++) {
             int finalI = i;
-            GameState traverse = traversal(j -> characterSupplier.apply(finalI, j));
-            if (traverse != null) return traverse;
+            GameState traverse = innerTraversal(j -> characterSupplier.apply(finalI, j));
+            if (traverse.gameOver()) return traverse;
         }
-        return null;
+        return result;
     }
 
-    private GameState traversal(Function<Integer, String> characterSupplier) {
+    private GameState innerTraversal(Function<Integer, String> characterSupplier) {
+        GameState result = new GameState(false, "-");
         boolean win = true;
         for (int j = 0; j < 3; j++) {
             if (characterSupplier.apply(0) == null || !characterSupplier.apply(0).equals(characterSupplier.apply(j))) {
@@ -55,8 +66,19 @@ public class RuleEngine {
                 break;
             }
         }
-        if (win) return new GameState(true, characterSupplier.apply(0));
-        return null;
+        if (win) result = new GameState(true, characterSupplier.apply(0));
+        return result;
+    }
+
+    private GameState countMoves(TicTacToe board) {
+        int count = 0;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (board.getSymbol(i, j) != null) count++;
+            }
+        }
+        if (count == 9) return new GameState(true, "-");
+        return new GameState(false, "-");
     }
 
 

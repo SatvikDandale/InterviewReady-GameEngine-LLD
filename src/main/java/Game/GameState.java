@@ -2,8 +2,8 @@ package Game;
 
 public class GameState {
 
-    boolean isComplete;
-    String winner;
+    private boolean isComplete;
+    private String winner;
 
     public GameState(boolean isComplete, String winner) {
         this.isComplete = isComplete;
